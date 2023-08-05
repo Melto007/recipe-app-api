@@ -19,3 +19,4 @@ class CalcTest(SimpleTestCase):
         res = calc.sub(5, 5)
 
         self.assertEqual(res, 0)
+        
