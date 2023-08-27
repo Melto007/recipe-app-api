@@ -10,15 +10,15 @@ import time
 class Command(BaseCommand):
     """Django command to wait for database."""
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **options):
         """Entry Point for commands."""
-        self.stdout.write('Waiting for database....')
+        self.stdout.write("waiting for database...")
         db_up = False
         while db_up is False:
             try:
                 self.check(databases=['default'])
                 db_up = True
             except (psycopg2Error, OperationalError):
-                self.stdout.write('DB is not connected')
+                self.stdout.write("Database unavailable, waiting 1 second...")
                 time.sleep(1)
-        self.stdout.write(self.style.SUCCESS("DB is connected"))
+        self.stdout.write(self.style.SUCCESS('Database Available'))
