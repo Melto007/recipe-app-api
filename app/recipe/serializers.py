@@ -5,8 +5,19 @@ Serializers for recipe apis
 from rest_framework import serializers
 from core.models import (
     Recipe,
-    Tag
+    Tag,
+    Ingredient,
 )
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Serializer for Ingerident Model"""
+
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name']
+        # read_only_fields = ['id']
+        extra_kwargs = {'id': {'read_only': True}}
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -22,10 +33,13 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipe api"""
     tags = TagSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
+        fields = [
+            'id', 'title', 'time_minutes', 'price', 'link',
+            'tags', 'ingredients']
         # extra_kwargs = {'id': {'read_only': True}}
         read_only_fields = ['id']
 
@@ -39,11 +53,23 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
             recipe.tags.add(tags_obj)
 
+    def _get_or_create_ingredient(self, ingredients, recipe):
+        """Handle create or get ingredients"""
+        auth_user = self.context['request'].user
+        for ingredient in ingredients:
+            ingredient_obj, created = Ingredient.objects.get_or_create(
+                user=auth_user,
+                **ingredient
+            )
+            recipe.ingredients.add(ingredient_obj)
+
     def create(self, validated_data):
         """create a recipe"""
         tags = validated_data.pop('tags', [])
+        ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
         self._get_or_create_tags(tags, recipe)
+        self._get_or_create_ingredient(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
