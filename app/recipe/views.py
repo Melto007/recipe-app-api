@@ -38,11 +38,10 @@ class RecipeViewSets(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class TagViewSets(
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet):
+class TagViewSets(mixins.DestroyModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.ListModelMixin,
+                  viewsets.GenericViewSet):
     """Viewset for tag"""
     serializer_class = serializers.TagSerializer
     queryset = Tag.objects.all()
